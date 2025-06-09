@@ -51,6 +51,7 @@ d = Document.from_filename("/path/to/document.sinli")
 Generate a SINLI document
 ```python
 from sinli import *
+from sinli.common import SinliCode as c
 from stdnum import isbn
 
 # Create a catalog document
@@ -67,18 +68,18 @@ header.PROVIDER = "Traficantes de Sueños"
 header.CURRENCY = "E"
 
 catalog.doc_lines.append(header)
-                                                                               
-# Create one book for the catalog document                                     
+
+# Create one book for the catalog document
 book = libros.v9.LibrosDoc.Book()
 
 book.EAN = "9788494597879"
 book.ISBN_INVOICE = isbn.format(book.EAN)
-book.AUTHOR_NAME = "Raquel Gutiérrez Aguilar"
+book.AUTHORS = "Raquel Gutiérrez Aguilar"
 book.TITLE_FULL = "Horizontes comunitario-populares"
 book.PRICE_PV = 12.00
 book.TAX_IVA = 4.00
 book.PRICE_PVP = book.PRICE_PV / (1 + book.TAX_IVA / 100) # precio sin IVA
-book.PRICE_TYPE = "F"
+book.PRICE_TYPE = c.PRICE_TYPE.FIXED
 
 catalog.doc_lines.append(book)
 
@@ -101,6 +102,32 @@ print(str(catalog))
 print(repr(catalog))
 ```
 
+Parse a SINLI email subject line
+```python
+from sinli.subject import Subject
+
+subject_line = "ESFANDEL1234567ESFANDELIB12345ENVIO 08FANDE"
+subject = Subject.from_str(subject_line)
+
+print(f'Received a SINLI message: {subject.DOCTYPE} ({subject.get_doctype_desc()})')
+# Received a SINLI message: ENVIO (Albarán de envío de distribuidora)
+```
+
+Build a SINLI email subject
+```python
+from sinli.subject import Subject
+
+subject = Subject()
+
+subject.FROM = "L1234567"
+subject.TO = "LIB12345"
+subject.DOCTYPE = "ENVIO"
+subject.VERSION = 8
+
+print(f"Send email with subject '{subject}'")
+# Send email with subject 'ESFANDEL1234567ESFANDELIB12345ENVIO 08FANDE'
+```
+
 ## Goals
 
 ### Generic
@@ -116,7 +143,7 @@ print(repr(catalog))
 ### For bookshops
 
 - [x] Albarán de pedido del cliente
-- [ ] Albarán de devolución
+- [x] Albarán de devolución
 - [x] Mensaje de texto
 
 ### For distributors
